@@ -9,7 +9,7 @@ app = Flask(__name__)
 # 🔥 LOAD DATA & ARTIFACTS
 # -----------------------------
 movies = pd.read_csv("data/movies.csv")
-ratings = pd.read_csv("data/ratings.csv")
+ratings = pd.read_csv("data/ratings_small.csv")
 
 # Precompute fast lookup tables
 user_watched = ratings.groupby('userId')['movieId'].apply(set).to_dict()

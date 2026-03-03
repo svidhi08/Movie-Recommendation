@@ -1,5 +1,5 @@
 #large files
-artifacts/*.pkl
+# artifacts/*.pkl
 data/ratings.csv
 
 
