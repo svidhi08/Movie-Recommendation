@@ -7,7 +7,7 @@ import os
 app = Flask(__name__)
 
 # -----------------------------
-# 🔥 LOAD DATA (Optimized dtypes)
+# LOAD DATA
 # -----------------------------
 movies = pd.read_csv(
     "data/movies.csv",
@@ -32,7 +32,7 @@ movie_dict = movies.set_index('movieId').to_dict('index')
 all_titles = movies['title'].tolist()
 
 # -----------------------------
-# Load trained artifacts (ONLY LOAD, DO NOT TRAIN HERE)
+# Load artifacts
 # -----------------------------
 with open("artifacts/content_similarity.pkl", "rb") as f:
     content_similarity = pickle.load(f)
@@ -49,34 +49,21 @@ def get_series_movies(movie_name, limit=6):
     parts = [p.strip() for p in re.split(pattern, clean, flags=re.IGNORECASE) if p.strip()]
     if not parts:
         return pd.DataFrame()
-
     core_name = parts[0]
-
     related = movies[movies['title'].str.contains(re.escape(core_name), case=False)]
-
     related = related[related['title'] != movie_name]
-
     return related.head(limit)
 
 # -----------------------------
 # Content-Based Recommendations
 # -----------------------------
 def get_content_recs(movie_id, watched_ids, series_titles, top_n=9):
-    similar = content_similarity.get(movie_id, [])
     recs = []
-
-    for mid, score in similar:
-        if mid in movie_dict:
-            title = movie_dict[mid]['title']
-            if mid not in watched_ids and title not in series_titles:
-                recs.append({
-                    'title': title,
-                    'genres': movie_dict[mid]['genres'].replace('|', ', ')
-                })
-
+    for mid, score in content_similarity.get(movie_id, []):
+        if mid in movie_dict and mid not in watched_ids and movie_dict[mid]['title'] not in series_titles:
+            recs.append({'title': movie_dict[mid]['title'], 'genres': movie_dict[mid]['genres'].replace('|', ', ')})
         if len(recs) >= top_n:
             break
-
     return recs
 
 # -----------------------------
@@ -97,65 +84,35 @@ def recommend():
 
     movie_id = movie_row['movieId'].values[0]
     liked_genres = movie_row['genres'].values[0].replace('|', ', ')
-
     watched_ids = user_watched.get(user_id, set())
 
-    # -------- Series --------
+    # Series
     series_df = get_series_movies(movie_name)
-    series_list = [
-        {'title': r['title'], 'genres': r['genres'].replace('|', ', ')}
-        for _, r in series_df.iterrows()
-    ]
+    series_list = [{'title': r['title'], 'genres': r['genres'].replace('|', ', ')} for _, r in series_df.iterrows()]
     series_titles = {s['title'] for s in series_list}
 
-    # -------- Content-Based --------
+    # Content-Based
     more_like_this = get_content_recs(movie_id, watched_ids, series_titles)
 
-    # -------- Collaborative Filtering --------
+    # Collaborative Filtering
     others_enjoyed = []
-
-    if user_id in user_watched:  # Cold-start protection
-
+    if user_id in user_watched:
         similar_users = movie_likers.get(movie_id, [])
-
         cf_candidates = set()
         for u in similar_users[:100]:
             cf_candidates.update(user_liked_movies.get(u, []))
+        for mid in cf_candidates:
+            if mid != movie_id and mid not in watched_ids and mid in movie_dict and movie_dict[mid]['title'] not in series_titles:
+                est = svd.predict(user_id, mid).est
+                others_enjoyed.append({'title': movie_dict[mid]['title'], 'genres': movie_dict[mid]['genres'].replace('|', ', '), 'score': est})
+        others_enjoyed = sorted(others_enjoyed, key=lambda x: x['score'], reverse=True)[:6]
 
-        # 🎯 If very few CF candidates → fallback to global SVD ranking
-        if len(cf_candidates) < 20:
-            candidate_pool = movies['movieId'].values[:500]
-        else:
-            candidate_pool = cf_candidates
-
-        for mid in candidate_pool:
-            if mid != movie_id and mid not in watched_ids:
-                if mid in movie_dict and movie_dict[mid]['title'] not in series_titles:
-                    est = svd.predict(user_id, mid).est
-                    others_enjoyed.append({
-                        'title': movie_dict[mid]['title'],
-                        'genres': movie_dict[mid]['genres'].replace('|', ', '),
-                        'score': est
-                    })
-
-        others_enjoyed = sorted(
-            others_enjoyed,
-            key=lambda x: x['score'],
-            reverse=True
-        )[:6]
-
-    return render_template(
-        "recommend.html",
-        movie_name=movie_name,
-        liked_genres=liked_genres,
-        series_list=series_list,
-        more_like_this=more_like_this,
-        others_enjoyed=others_enjoyed
-    )
+    return render_template("recommend.html", movie_name=movie_name, liked_genres=liked_genres,
+                           series_list=series_list, more_like_this=more_like_this, others_enjoyed=others_enjoyed)
 
 # -----------------------------
 # Render Dynamic Port
 # -----------------------------
-# if __name__ == "__main__":
-#     port = int(os.environ.get("PORT", 10000))
-#     app.run(host="0.0.0.0", port=port)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
