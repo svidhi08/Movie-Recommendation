@@ -71,7 +71,7 @@ data = Dataset.load_from_df(
 trainset = data.build_full_trainset()
 
 svd = SVD(
-    n_factors=50,   # default is 100
+    n_factors=20,   # default is 100
     n_epochs=20,
     random_state=42
 )
