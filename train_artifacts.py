@@ -7,7 +7,7 @@ from surprise import Dataset, Reader, SVD
 # -----------------------------
 # CONFIG
 # -----------------------------
-CONTENT_TOP_K = 15   # content-based candidates
+CONTENT_TOP_K = 10   # content-based candidates
 
 # -----------------------------
 # 1️⃣ Load movies

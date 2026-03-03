@@ -23,8 +23,8 @@ ratings = ratings[ratings['movieId'].isin(popular_movies)]
 # -----------------------------
 # Optional: limit total rows for free deploy
 # -----------------------------
-if len(ratings) > 200_000:
-    ratings = ratings.sample(200_000, random_state=42)
+if len(ratings) > 100_000:
+    ratings = ratings.sample(100_000, random_state=42)
 
 # -----------------------------
 # Save small CSV
