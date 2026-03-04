@@ -8,16 +8,16 @@
 <h2>📌 Project Overview</h2>
 
 <p>
-This project is a <strong>Hybrid Recommendation System</strong> that combines:
+This project is a <strong>Hybrid Recommendation System</strong> combining:
 </p>
 
 <ul>
-  <li><strong>Content-Based Filtering (CBF)</strong></li>
-  <li><strong>Collaborative Filtering (SVD - Matrix Factorization)</strong></li>
+  <li><strong>Content-Based Filtering (CBF)</strong> – TF-IDF + Cosine Similarity</li>
+  <li><strong>Collaborative Filtering (SVD)</strong> – Matrix Factorization for personalized recommendations</li>
 </ul>
 
 <p>
-It first selects similar movies using content similarity, then ranks them using collaborative filtering for personalized recommendations.
+It first finds similar movies, then ranks them using collaborative filtering based on the user’s history.
 </p>
 
 <hr/>
@@ -25,9 +25,10 @@ It first selects similar movies using content similarity, then ranks them using 
 <h2>🎯 Recommendation Strategy</h2>
 
 <ul>
-  <li><strong>Step 1:</strong> Select Top 30 similar movies using TF-IDF + Cosine Similarity</li>
-  <li><strong>Step 2:</strong> Rank candidates using SVD collaborative filtering</li>
-  <li><strong>Final Output:</strong> Personalized Top Recommendations</li>
+  <li><strong>Step 1:</strong> Select Top 15–30 similar movies using TF-IDF + Cosine Similarity</li>
+  <li><strong>Step 2:</strong> Rank candidates using SVD collaborative filtering for the given user</li>
+  <li><strong>Step 3:</strong> Apply global popularity adjustment and user “soulmate” logic to boost recommendations</li>
+  <li><strong>Final Output:</strong> Personalized Top Recommendations per user</li>
 </ul>
 
 <hr/>
@@ -57,15 +58,15 @@ It first selects similar movies using content similarity, then ranks them using 
 <h2>🚀 Main Features</h2>
 
 <ul>
-  <li>Personalized recommendations for each user</li>
-  <li>"Continue the Story" section (detects movie series)</li>
-  <li>"More Like This" (Content-Based)</li>
-  <li>"Others Also Enjoyed" (Collaborative Filtering)</li>
-  <li>Fast prediction using pre-saved artifacts</li>
-  <li>Clean Flask-based Web Interface</li>
+  <li>Personalized recommendations per user ID</li>
+  <li>"Continue the Story" section – detects sequels and series</li>
+  <li>"More Like This" – Content-Based Recommendations</li>
+  <li>"Others Also Enjoyed" – Collaborative Filtering with user-soulmate + popularity adjustment</li>
+  <li>Efficient prediction using pre-saved artifacts</li>
+  <li>Memory-optimized for deployment on free cloud tiers</li>
+  <li>Flask-based Web Interface</li>
 </ul>
 
-<hr/>
 <hr/>
 
 <h2>🖼️ Application Preview</h2>
@@ -117,12 +118,13 @@ It first selects similar movies using content similarity, then ranks them using 
 
 <hr/>
 
-<h2>⚠️ Note</h2>
+<h2>⚠️ Notes</h2>
 
-<p>
-This project demonstrates how hybrid recommendation systems combine 
-content similarity and collaborative filtering to improve personalization and ranking.
-</p>
+<ul>
+  <li>Hybrid recommendation combines content similarity and collaborative filtering to personalize results.</li>
+  <li>"Soulmate" logic boosts recommendations based on users with similar tastes.</li>
+  <li>Global popularity adjustment prevents blockbuster bias in scoring.</li>
+</ul>
 
 <div align="center">
   <p><i>Developed by <b>Vidhi</b> 🎬</i></p>
